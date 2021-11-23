@@ -459,7 +459,7 @@ impl<'a> RequestBuilder<'a> {
             )
         };
         if dry_run {
-            let result = config.rpc_client.simulate_transaction(&tx)?;
+            let result = rpc_client.simulate_transaction(&tx)?;
             println!("Simulate result: {:?}", result);
         }
         rpc_client
