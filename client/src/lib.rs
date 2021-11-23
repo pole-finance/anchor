@@ -441,7 +441,7 @@ impl<'a> RequestBuilder<'a> {
         Ok(instructions)
     }
 
-    pub fn send(self) -> Result<Signature, ClientError> {
+    pub fn send(self, dry_run: bool) -> Result<Signature, ClientError> {
         let instructions = self.instructions()?;
 
         let mut signers = self.signers;
@@ -458,10 +458,18 @@ impl<'a> RequestBuilder<'a> {
                 recent_hash,
             )
         };
-
+        if dry_run {
+            let result = config.rpc_client.simulate_transaction(&tx)?;
+            println!("Simulate result: {:?}", result);
+        }
         rpc_client
-            .send_and_confirm_transaction(&tx)
-            .map_err(Into::into)
+            .send_and_confirm_transaction_with_spinner_and_config(
+                &tx,
+                RpcSendTransactionConfig {
+                    skip_preflight: dry_run,
+                    ..RpcSendTransactionConfig::default()
+                },
+            ).map_err(Into::into)
     }
 }
 
